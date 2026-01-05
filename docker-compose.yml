@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: 123
     ports:
-      - "5436:5432"  # Porta do seu notebook: Porta do container
+      - "5437:5432"  # Porta do seu notebook: Porta do container
     volumes:
       # Persistir dados do banco
       - postgres-data:/var/lib/postgresql/data
