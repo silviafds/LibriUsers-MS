@@ -1,0 +1,29 @@
+spring:
+  application.name: Libri Users Micro Service
+
+  config:
+    activate:
+      on-profile: default
+
+  main:
+    web-application-type: servlet
+
+    datasource:
+      url: jdbc:postgresql://localhost:5436/libri-users
+      username: user
+      password: "123"
+      driver-class-name: org.postgresql.Driver
+
+    jpa:
+      database-platform: org.hibernate.dialect.PostgreSQLDialect
+      hibernate:
+        ddl-auto: update
+      show-sql: true
+      properties:
+        hibernate:
+          format_sql: true
+
+server:
+  port: 8082
+  servlet:
+    context-path: /
