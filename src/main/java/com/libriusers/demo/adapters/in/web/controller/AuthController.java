@@ -6,6 +6,8 @@ import com.libriusers.demo.adapters.in.web.dto.response.LogoutResponse;
 import com.libriusers.demo.adapters.in.web.dto.response.RegisterResponse;
 import com.libriusers.demo.application.service.TokenService;
 import com.libriusers.demo.application.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
@@ -14,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -35,10 +36,23 @@ public class AuthController {
         this.userService = userService;
     }
 
+    @Operation(summary = "Authenticate user",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Returns token."),
+                    @ApiResponse(responseCode = "400", description = "Login failed."),
+                    @ApiResponse(responseCode = "500", description = "Internal server error"),
+            })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid AuthenticationRequest data) {
         return userService.login(data);
     }
+
+    @Operation(summary = "Register new user",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "User registered in the system"),
+                    @ApiResponse(responseCode = "400", description = "User registration failed"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            })
 
     @PostMapping("/register")
     @Transactional
@@ -46,6 +60,12 @@ public class AuthController {
         return userService.registerUser(data);
     }
 
+    @Operation(summary = "Log out of the system.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "User logged out of the system"),
+                    @ApiResponse(responseCode = "401", description = "Failed to log out of the system"),
+                    @ApiResponse(responseCode = "500", description = "Internal server failure"),
+            })
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -65,7 +85,6 @@ public class AuthController {
             // Adicione o token à lista negra para invalidá-lo
             tokenService.addToBlacklist(token);
 
-            // Retorna sucesso
             LogoutResponse successResponse = new LogoutResponse(
                     "200",
                     "Saindo do sistema",
@@ -73,7 +92,6 @@ public class AuthController {
             return ResponseEntity.ok(successResponse);
 
         } catch (Exception e) {
-            // Captura exceções genéricas e retorna erro 500
             LogoutResponse errorResponse = new LogoutResponse(
                     "500",
                     "Erro interno no servidor",
@@ -89,11 +107,6 @@ public class AuthController {
             return authHeader.substring(7); // O token JWT começa após "Bearer "
         }
         return null;
-    }
-
-    @PostMapping("/login2")
-    public String login2() {
-        return "funciona";
     }
 
 }
