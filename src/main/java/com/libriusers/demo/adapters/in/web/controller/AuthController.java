@@ -53,7 +53,6 @@ public class AuthController {
                     @ApiResponse(responseCode = "400", description = "User registration failed"),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             })
-
     @PostMapping("/register")
     @Transactional
     public ResponseEntity<RegisterResponse> register(@RequestBody @Valid UserRequest data) {
