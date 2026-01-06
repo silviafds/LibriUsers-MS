@@ -3,6 +3,7 @@ package com.libriusers.demo.application.service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.libriusers.demo.domain.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -61,6 +63,7 @@ public class TokenService {
             return "";
         }
     }
+
     public void addToBlacklist(String token) {
         tokenBlacklist.add(token);
     }

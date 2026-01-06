@@ -41,7 +41,6 @@ public class UserService {
 
             var token = tokenService.generateToken((User) auth.getPrincipal());
 
-
             // Retorna o token
             return ResponseEntity.ok(new LoginResponse(token));
 
