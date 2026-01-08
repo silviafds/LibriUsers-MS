@@ -100,6 +100,47 @@ public class AuthController {
         }
     }
 
+    // AuthController.java no User Service
+    @Operation(summary = "Validate if token is not blacklisted",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Returns true if token is valid, false if blacklisted"),
+                    @ApiResponse(responseCode = "400", description = "Invalid token format"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error"),
+            })
+    // AuthController.java no User Service - DEBUG VERSION
+    @GetMapping("/validate-token")
+    public ResponseEntity<Boolean> validateToken(@RequestParam String token) {
+        try {
+            System.out.println("=== USER SERVICE VALIDATE TOKEN ===");
+            System.out.println("Token (first 30 chars): " +
+                    (token.length() > 30 ? token.substring(0, 30) + "..." : token));
+
+            // 1. Verifica blacklist
+            boolean isBlacklisted = tokenService.isTokenBlacklisted(token);
+            System.out.println("Is token blacklisted? " + isBlacklisted);
+
+            if (isBlacklisted) {
+                System.out.println("❌ Token is BLACKLISTED");
+                return ResponseEntity.ok(false);
+            }
+
+            // 2. Valida token
+            String email = tokenService.validateToken(token);
+            boolean isValid = email != null && !email.isEmpty();
+
+            System.out.println("Email from token: " + (email != null ? email : "null"));
+            System.out.println("Is token valid? " + isValid);
+            System.out.println("=== END VALIDATION ===");
+
+            return ResponseEntity.ok(isValid);
+
+        } catch (Exception e) {
+            System.out.println("❌ ERROR validating token: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.ok(false);
+        }
+    }
+
     private String extractTokenFromHeader(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {

@@ -32,7 +32,7 @@ server:
 api:
   security:
     token:
-      secret: ${JWT_SECRET:my-very-strong-secret-key-of-32-characters}
+      secret: my-very-strong-secret-key-of-32-characters
 
 eureka:
   client:
