@@ -4,4 +4,5 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserRepository {
     UserDetails findByEmail(String username);
+    String searchUserById(Long id);
 }

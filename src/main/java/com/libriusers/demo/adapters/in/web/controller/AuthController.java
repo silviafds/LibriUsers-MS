@@ -4,9 +4,14 @@ import com.libriusers.demo.adapters.in.web.dto.request.AuthenticationRequest;
 import com.libriusers.demo.adapters.in.web.dto.request.UserRequest;
 import com.libriusers.demo.adapters.in.web.dto.response.LogoutResponse;
 import com.libriusers.demo.adapters.in.web.dto.response.RegisterResponse;
+import com.libriusers.demo.application.service.AuthorizationService;
 import com.libriusers.demo.application.service.TokenService;
 import com.libriusers.demo.application.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -66,9 +71,12 @@ public class AuthController {
                     @ApiResponse(responseCode = "500", description = "Internal server failure"),
             })
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> logout(
+            @Parameter(description = "Bearer token for authentication",
+                    required = true,
+                    example = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+            @RequestHeader(value = "Authorization", required = false) String request) {
         try {
-            // Obtenha o token do cabeçalho da autorização
             String token = extractTokenFromHeader(request);
 
             // Verifica se o token é válido
@@ -100,31 +108,37 @@ public class AuthController {
         }
     }
 
-    // AuthController.java no User Service
+    @Operation(summary = "Search user for id",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Search user in the system for id"
+                    ),
+                    @ApiResponse(responseCode = "400", description = "Search user failed"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            })
+    @GetMapping("/search-user/{id}")
+    public String searchUserForId(@PathVariable Long id, @RequestHeader(value = "Authorization", required = false) String tokenAuth) {
+        System.out.println("ID RECEBIDO PARA BUSCA: "+ id);
+        return userService.searchUserPerId(id);
+    }
+
     @Operation(summary = "Validate if token is not blacklisted",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Returns true if token is valid, false if blacklisted"),
                     @ApiResponse(responseCode = "400", description = "Invalid token format"),
                     @ApiResponse(responseCode = "500", description = "Internal server error"),
             })
-    // AuthController.java no User Service - DEBUG VERSION
     @GetMapping("/validate-token")
     public ResponseEntity<Boolean> validateToken(@RequestParam String token) {
         try {
-            System.out.println("=== USER SERVICE VALIDATE TOKEN ===");
-            System.out.println("Token (first 30 chars): " +
-                    (token.length() > 30 ? token.substring(0, 30) + "..." : token));
-
-            // 1. Verifica blacklist
             boolean isBlacklisted = tokenService.isTokenBlacklisted(token);
-            System.out.println("Is token blacklisted? " + isBlacklisted);
 
             if (isBlacklisted) {
                 System.out.println("❌ Token is BLACKLISTED");
                 return ResponseEntity.ok(false);
             }
 
-            // 2. Valida token
             String email = tokenService.validateToken(token);
             boolean isValid = email != null && !email.isEmpty();
 
@@ -141,11 +155,11 @@ public class AuthController {
         }
     }
 
-    private String extractTokenFromHeader(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7); // O token JWT começa após "Bearer "
+    private String extractTokenFromHeader(String authorizationHeader) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7);
         }
+
         return null;
     }
 

@@ -62,12 +62,11 @@ public class SecurityFilter extends OncePerRequestFilter {
                 System.out.println("Token inválido ou expirado");
                 // Token inválido, mas permita que a requisição continue (para endpoints públicos)
                 // Ou retorne erro 401 se quiser bloquear
-                // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
-                // return;
+                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+                 return;
             }
         }
 
-        // Continue com a cadeia de filtros
         filterChain.doFilter(request, response);
     }
 

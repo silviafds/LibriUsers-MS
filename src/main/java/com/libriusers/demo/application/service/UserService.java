@@ -8,6 +8,7 @@ import com.libriusers.demo.adapters.in.web.dto.response.RegisterResponse;
 import com.libriusers.demo.application.ports.out.repository.UserRepositoryImpl;
 import com.libriusers.demo.domain.enums.CodeMessageHttp;
 import com.libriusers.demo.domain.enums.Role;
+import com.libriusers.demo.domain.exceptions.UserNotFoundException;
 import com.libriusers.demo.domain.model.User;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -41,7 +42,6 @@ public class UserService {
 
             var token = tokenService.generateToken((User) auth.getPrincipal());
 
-            // Retorna o token
             return ResponseEntity.ok(new LoginResponse(token));
 
         } catch (BadCredentialsException | InternalAuthenticationServiceException e) {
@@ -94,6 +94,16 @@ public class UserService {
                     "Um erro inesperado aconteceu no servidor: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(registerResponse);
         }
+    }
+
+    public String searchUserPerId(Long id) {
+
+        if (!userRepositoryImpl.existsById(id)) {
+            throw new UserNotFoundException(id);
+        }
+
+        String user = userRepositoryImpl.searchUserById(id);
+        return user;
     }
 
 }
