@@ -20,6 +20,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service responsible for user authentication, registration,
+ * and user lookup operations.
+ *
+ * This class centralizes the business logic related to users,
+ * including login with Spring Security, password encryption,
+ * JWT token generation, and user persistence.
+ */
 @Service
 public class UserService {
 
@@ -35,6 +43,13 @@ public class UserService {
         this.tokenService = tokenService;
     }
 
+    /**
+     * Authenticates a user using Spring Security and generates a JWT token.
+     *
+     * @param data authentication request containing login and password
+     * @return ResponseEntity with JWT token if authentication succeeds,
+     *         or an error response if authentication fails
+     */
     public ResponseEntity<?> login(AuthenticationRequest data) {
         try {
             var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
@@ -62,6 +77,16 @@ public class UserService {
         }
     }
 
+    /**
+     * Registers a new user in the system.
+     *
+     * This method validates if the email already exists,
+     * encrypts the password, assigns a role, and saves
+     * the user in the database.
+     *
+     * @param data user registration data
+     * @return ResponseEntity with registration status and message
+     */
     @Transactional
     public ResponseEntity<RegisterResponse> registerUser(UserRequest data) {
         try {
@@ -96,6 +121,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Retrieves a user by its ID.
+     *
+     * @param id user identifier
+     * @return user information
+     * @throws UserNotFoundException if user does not exist
+     */
     public String searchUserPerId(Long id) {
 
         if (!userRepositoryImpl.existsById(id)) {

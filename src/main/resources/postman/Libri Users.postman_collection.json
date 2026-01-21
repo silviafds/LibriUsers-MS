@@ -1,0 +1,179 @@
+{
+  "info": {
+    "_postman_id": "01458bd0-5fed-414b-90e5-695ca64cf39a",
+    "name": "Libri Users",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "23899393"
+  },
+  "item": [
+    {
+      "name": "Register new user",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\": \"roni\",\r\n    \"email\": \"roni@gmail.com\",\r\n    \"password\": \"123\",\r\n    \"role\": \"master\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://{{host}}:{{port}}/auth/register",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login Libri MS",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Isso vai rodar APÓS receber a resposta do login\r",
+              "if (pm.response.code === 200) {\r",
+              "    var jsonData = pm.response.json();\r",
+              "\r",
+              "    // Salva o token como variável global\r",
+              "    pm.globals.set(\"tokenLibri\", jsonData.token);\r",
+              "\r",
+              "    // Ou se o token vier em outro campo:\r",
+              "    // pm.globals.set(\"tokenLibri\", jsonData.access_token);\r",
+              "    // pm.globals.set(\"tokenLibri\", jsonData.data.token);\r",
+              "\r",
+              "    console.log(\"Token salvo: \" + jsonData.token);\r",
+              "} else {\r",
+              "    console.log(\"Login falhou\");\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"login\": \"silvia2@gmail.com\",\r\n    \"password\": \"123\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://{{host}}:{{port}}/auth/login",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Logout Libri MS",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{tokenLibri}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://{{host}}:{{port}}/auth/logout",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "auth",
+            "logout"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "actuator/health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8089/actuator/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8089",
+          "path": [
+            "actuator",
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "search user by id",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{tokenLibri}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8082/auth/search-user/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8082",
+          "path": [
+            "auth",
+            "search-user",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

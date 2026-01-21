@@ -21,6 +21,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Service responsible for managing JWT tokens.
+ *
+ * This class handles token generation, validation, expiration,
+ * and token invalidation using a blacklist strategy.
+ * It also performs periodic cleanup of expired tokens.
+ */
 @Service
 public class TokenService {
     @Value("${api.security.token.secret}")
@@ -29,12 +36,27 @@ public class TokenService {
     private Set<String> tokenBlacklist = new HashSet<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
+    /**
+     * Initializes scheduled tasks.
+     *
+     * Schedules periodic cleanup of expired tokens
+     * from the blacklist.
+     */
     @PostConstruct
     public void init() {
         // Limpa tokens expirados da blacklist a cada hora
         scheduler.scheduleAtFixedRate(this::cleanupExpiredTokens, 1, 1, TimeUnit.HOURS);
     }
 
+    /**
+     * Generates a JWT token for an authenticated user.
+     *
+     * The token contains issuer, subject (email),
+     * userId claim, and expiration date.
+     *
+     * @param user authenticated user
+     * @return generated JWT token
+     */
     public String generateToken(User user) {
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -51,7 +73,18 @@ public class TokenService {
         }
     }
 
-    // TokenService.java no User Service - CORRIGIDO
+    /**
+     * Validates a JWT token.
+     *
+     * This method checks:
+     * - If the token is blacklisted
+     * - Token signature
+     * - Issuer
+     * - Expiration date
+     *
+     * @param token JWT token
+     * @return subject (email) if valid, or empty string if invalid
+     */
     public String validateToken(String token) {
         System.out.println("=== TOKEN SERVICE VALIDATE ===");
         System.out.println("Validating token: " +
@@ -101,15 +134,34 @@ public class TokenService {
         }
     }
 
+    /**
+     * Adds a token to the blacklist.
+     *
+     * Used mainly during logout to invalidate the token.
+     *
+     * @param token JWT token to invalidate
+     */
     public void addToBlacklist(String token) {
         System.out.println("Adding token to blacklist: " + token.substring(0, Math.min(20, token.length())) + "...");
         tokenBlacklist.add(token);
     }
 
+    /**
+     * Checks if a token is blacklisted.
+     *
+     * @param token JWT token
+     * @return true if token is blacklisted, false otherwise
+     */
     public boolean isTokenBlacklisted(String token) {
         return tokenBlacklist.contains(token);
     }
 
+    /**
+     * Removes expired tokens from the blacklist.
+     *
+     * This method is executed periodically to
+     * prevent memory leaks.
+     */
     public void cleanupExpiredTokens() {
         System.out.println("Cleaning up expired tokens from blacklist...");
         int initialSize = tokenBlacklist.size();
@@ -131,6 +183,12 @@ public class TokenService {
         System.out.println("Cleaned " + (initialSize - tokenBlacklist.size()) + " expired tokens from blacklist");
     }
 
+
+    /**
+     * Generates the token expiration date.
+     *
+     * @return expiration Instant
+     */
     private Instant genExpirationDate() {
         //return LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.of("-03:00"));
         return LocalDateTime.now().plusHours(8).toInstant(ZoneOffset.of("-03:00"));
